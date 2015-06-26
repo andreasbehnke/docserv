@@ -12,8 +12,10 @@ import javax.ws.rs.NotFoundException;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -53,17 +55,30 @@ public class DocumentResource {
 		return new EntityTag(documentFile.lastModified() + "");
 	}
 	
-	@GET
-	@Path("/{documentName}")
-	public Response getDocument(@PathParam("documentName") String documentName) throws IOException {
-		File documentFile = openFile(documentName);
-		if (!documentFile.exists()) {
-			throw new NotFoundException();
-		}
+	private boolean isUnchanged(Request request, EntityTag eTag) {
+		return request.evaluatePreconditions(eTag) != null;
+	}
+	
+	private Document createDocument(String documentName, File documentFile) throws IOException {
 		Document document = new Document();
 		document.setName(documentName);
 		document.setLastModified(DATE_FORMAT.format(getLastModified(documentFile)));
 		document.setPageCount(readPageCount(documentFile));
-		return Response.ok(document).tag(createETag(documentFile)).build();
+		return document;
+	}
+	
+	@GET
+	@Path("/{documentName}")
+	public Response getDocument(@PathParam("documentName") String documentName, @Context Request request) throws IOException {
+		File documentFile = openFile(documentName);
+		if (!documentFile.exists()) {
+			throw new NotFoundException();
+		}
+		EntityTag eTag = createETag(documentFile);
+		if (isUnchanged(request, eTag)) {
+			return Response.notModified(eTag).build();
+		} else {
+			return Response.ok(createDocument(documentName, documentFile)).tag(eTag).build();
+		}
 	}
 }
