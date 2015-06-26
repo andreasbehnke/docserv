@@ -2,10 +2,44 @@
 <html>
 <head>
 	<title>PDF Document Service</title>
+	<script type="text/javascript" src="js/jquery-2.1.4.min.js"></script>
+	<script type="text/javascript">
+	
+	$(document).ready(function() {
+		$.ajax({
+			url: "/services/document",
+			success: function(documentList) {
+				$.each(documentList, function(index, documentName) {
+					$("<li><a href='#'>" + documentName + "</a></li>")
+						.on("click", function() {
+							openDocument(documentName);
+						})
+						.appendTo("#document-list");
+            	});
+			}
+		});
+	});
+	
+	function openDocument(documentName) {
+		$.ajax({
+			url: "/services/document/" + documentName,
+			success: function(document) {
+				$("#document-name").html(document.name);
+				$("#document-info").html("Number of pages: " + document.pageCount + ", last modified: " + document.lastModified);
+			}
+		});
+	};
+ 
+	</script>
 </head>
 <body>
+
 <h1>Example PDF Document Service<h1>
 <h2>List of Documents:</h2>
+<ul id="document-list"></ul>
 
+<h2>Selected Document:<h2>
+<h3 id="document-name">none</h3>
+<span id="document-info"></span>
 </body>
 </html>
