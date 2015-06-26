@@ -13,6 +13,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.springframework.stereotype.Component;
@@ -49,7 +50,7 @@ public class DocumentResource {
 	
 	@GET
 	@Path("/{documentName}")
-	public Document getDocument(@PathParam("documentName") String documentName) throws IOException {
+	public Response getDocument(@PathParam("documentName") String documentName) throws IOException {
 		File documentFile = openFile(documentName);
 		if (!documentFile.exists()) {
 			throw new NotFoundException();
@@ -58,6 +59,6 @@ public class DocumentResource {
 		document.setName(documentName);
 		document.setLastModified(DATE_FORMAT.format(getLastModified(documentFile)));
 		document.setPageCount(readPageCount(documentFile));
-		return document;
+		return Response.ok(document).build();
 	}
 }
