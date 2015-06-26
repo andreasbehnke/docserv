@@ -12,6 +12,7 @@ import javax.ws.rs.NotFoundException;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -48,6 +49,10 @@ public class DocumentResource {
 		return new Date(documentFile.lastModified());
 	}
 	
+	private EntityTag createETag(File documentFile) {
+		return new EntityTag(documentFile.lastModified() + "");
+	}
+	
 	@GET
 	@Path("/{documentName}")
 	public Response getDocument(@PathParam("documentName") String documentName) throws IOException {
@@ -59,6 +64,6 @@ public class DocumentResource {
 		document.setName(documentName);
 		document.setLastModified(DATE_FORMAT.format(getLastModified(documentFile)));
 		document.setPageCount(readPageCount(documentFile));
-		return Response.ok(document).build();
+		return Response.ok(document).tag(createETag(documentFile)).build();
 	}
 }
