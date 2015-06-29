@@ -12,34 +12,62 @@
 				$.each(documentList, function(index, documentName) {
 					$("<li><a href='#'>" + documentName + "</a></li>")
 						.on("click", function() {
-							openDocument(documentName);
+							openDocument(documentName, 0);
 						})
 						.appendTo("#document-list");
-            	});
-			}
-		});
+            		});
+				}
+			});	
+		$("#previous-page").on("click", previousPage).hide();
+		$("#next-page").on("click", nextPage).hide();
 	});
+
+	var documentObject = null;
 	
-	function openDocument(documentName) {
+	function openDocument(documentName, pageIndex) {
 		$.ajax({
-			url: "/services/document/" + documentName,
-			success: function(document) {
-				$("#document-name").html(document.name);
-				$("#document-info").html("Number of pages: " + document.pageCount + ", last modified: " + document.lastModified);
+			url: "/services/document/" + documentName + "/" + pageIndex,
+			success: function(result) {
+				documentObject = result;
+				$("#document-name").html(documentObject.name);
+				$("#document-info").html("Number of pages: " + documentObject.pageCount + ", last modified: " + documentObject.lastModified);
+				$("#page-image").attr("src", "data:image/png;base64," + documentObject.pageImageSrc);
+				if (documentObject.pageIndex > 0) {
+					$("#previous-page").show();
+				} else {
+					$("#previous-page").hide();
+				}
+				if (documentObject.pageIndex < documentObject.pageCount - 1) {
+					$("#next-page").show();
+				} else {
+					$("#next-page").hide();
+				}
+				$("#current-page").html(documentObject.pageIndex + 1);
 			}
 		});
+	};
+	
+	function previousPage() {
+		openDocument(documentObject.name, documentObject.pageIndex -1);
+	};
+	
+	function nextPage() {
+		openDocument(documentObject.name, documentObject.pageIndex +1);
 	};
  
 	</script>
 </head>
 <body>
 
-<h1>Example PDF Document Service<h1>
+<h1>Example PDF Document Service</h1>
 <h2>List of Documents:</h2>
 <ul id="document-list"></ul>
 
-<h2>Selected Document:<h2>
+<h2>Selected Document:</h2>
 <h3 id="document-name">none</h3>
 <span id="document-info"></span>
+<br />
+<a href="#" id="previous-page">&lt;--</a><span id="current-page" style="padding:20px;"></span><a href="#" id="next-page">--&gt;</a><br />
+<img id="page-image" />
 </body>
 </html>

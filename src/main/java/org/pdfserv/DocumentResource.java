@@ -1,11 +1,12 @@
 package org.pdfserv;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 
@@ -21,7 +22,6 @@ import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.ImageType;
@@ -78,6 +78,19 @@ public class DocumentResource {
 		return document;
 	}
 	
+	private Document createDocument(String documentName, File documentFile, int pageIndex, int pageResolution) throws IOException {
+		Document document = createDocument(documentName, documentFile);
+		document.setPageIndex(pageIndex);
+		try (PDDocument pdfDocument = PDDocument.load(documentFile); ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+			int pageNumberInternal = Math.min(pageIndex, pdfDocument.getNumberOfPages() - 1);
+			PDFRenderer renderer = new PDFRenderer(pdfDocument);
+			BufferedImage pageImage = renderer.renderImageWithDPI(pageNumberInternal, pageResolution, ImageType.RGB);
+			ImageIO.write(pageImage, "PNG", output);
+			document.setPageImageSrc(Base64.getEncoder().encodeToString(output.toByteArray()));
+		}
+		return document;
+	}
+	
 	@GET
 	@Path("/{documentName}")
 	public Response getDocument(@PathParam("documentName") String documentName, @Context Request request) throws IOException {
@@ -90,25 +103,11 @@ public class DocumentResource {
 		}
 	}
 	
-	private StreamingOutput createPage(File documentFile, int pageNumber, int pageResolution) {
-		return (OutputStream output) -> {
-			try (PDDocument pdfDocument = PDDocument.load(documentFile)) {
-				int pageNumberInternal = Math.min(pageNumber, pdfDocument.getNumberOfPages() - 1);
-				PDFRenderer renderer = new PDFRenderer(pdfDocument);
-				BufferedImage pageImage = renderer.renderImageWithDPI(pageNumberInternal, pageResolution, ImageType.RGB);
-				ImageIO.write(pageImage, "PNG", output);
-			} finally {
-				output.close();
-			}
-		};
-	}
-	
 	@GET
-	@Path("/{documentName}/{pageNumber}")
-	@Produces("image/png")
+	@Path("/{documentName}/{pageIndex}")
 	public Response getPage(
 			@PathParam("documentName") String documentName, 
-			@PathParam("pageNumber") int pageNumber,
+			@PathParam("pageIndex") int pageIndex,
 			@QueryParam("pageResolution") Integer pageResolution,
 			@Context Request request) throws IOException {
 		File documentFile = openDocumentFile(documentName);
@@ -117,7 +116,7 @@ public class DocumentResource {
 			return Response.notModified(eTag).build();
 		} else {
 			int pageResolutionInternal = (pageResolution == null) ? 72 : pageResolution;
-			return Response.ok(createPage(documentFile, pageNumber, pageResolutionInternal)).tag(eTag).build();
+			return Response.ok(createDocument(documentName, documentFile, pageIndex, pageResolutionInternal)).tag(eTag).build();
 		}
 	}
 }

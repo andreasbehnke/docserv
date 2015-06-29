@@ -8,6 +8,10 @@ public class Document {
 	private int pageCount;
 	
 	private String lastModified;
+	
+	private String pageImageSrc;
+	
+	private int pageIndex;
 
 	public String getName() {
 		return name;
@@ -31,5 +35,21 @@ public class Document {
 
 	public void setLastModified(String lastModified) {
 		this.lastModified = lastModified;
+	}
+
+	public String getPageImageSrc() {
+		return pageImageSrc;
+	}
+
+	public void setPageImageSrc(String pageImageSrc) {
+		this.pageImageSrc = pageImageSrc;
+	}
+
+	public int getPageIndex() {
+		return pageIndex;
+	}
+
+	public void setPageIndex(int pageIndex) {
+		this.pageIndex = pageIndex;
 	}
 }
