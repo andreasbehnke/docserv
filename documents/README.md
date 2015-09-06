@@ -1,1 +1,1 @@
-Place example PDF documents here!
+Place example documents here!

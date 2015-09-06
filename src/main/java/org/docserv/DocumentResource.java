@@ -1,4 +1,4 @@
-package org.pdfserv;
+package org.docserv;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;

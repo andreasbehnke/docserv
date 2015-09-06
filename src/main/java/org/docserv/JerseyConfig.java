@@ -1,4 +1,4 @@
-package org.pdfserv;
+package org.docserv;
 
 import javax.ws.rs.ApplicationPath;
 

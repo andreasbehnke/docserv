@@ -1,4 +1,4 @@
-package org.pdfserv;
+package org.docserv;
 
 
 public class Document {

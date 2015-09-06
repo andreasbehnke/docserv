@@ -1,2 +1,2 @@
-# pdfserv
-REST API around functionality of pdfbox
+# docserv
+REST API for accessing and displaying documents
