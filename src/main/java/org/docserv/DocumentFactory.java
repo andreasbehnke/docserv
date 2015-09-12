@@ -35,10 +35,6 @@ public class DocumentFactory {
 		}
 	}
 	
-	public Set<DocumentProvider> getDocumentProviders() {
-		return documentProviders;
-	}
-	
 	private DocumentProvider findProvider(InputStream input) throws IOException {
 		String mimeType = mimeTypes.detect(input, new Metadata()).toString();
 		for (DocumentProvider documentProvider : documentProviders) {
