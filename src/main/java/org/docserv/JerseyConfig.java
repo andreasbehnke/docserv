@@ -11,6 +11,7 @@ public class JerseyConfig extends ResourceConfig {
 
     public JerseyConfig() {
         register(DocumentResource.class);
+        register(DirectoryResource.class);
     }
 
 }
