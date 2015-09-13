@@ -24,7 +24,7 @@
 
 	var documentObject = null;
 	
-	function openDocument(documentName, pageIndex) {
+	var openDocument = function(documentName, pageIndex) {
 		$.ajax({
 			url: "/services/document/" + documentName + "/" + pageIndex,
 			success: function(result) {
@@ -47,11 +47,11 @@
 		});
 	};
 	
-	function previousPage() {
+	var previousPage = function() {
 		openDocument(documentObject.name, documentObject.pageIndex -1);
 	};
 	
-	function nextPage() {
+	var nextPage = function() {
 		openDocument(documentObject.name, documentObject.pageIndex +1);
 	};
  
