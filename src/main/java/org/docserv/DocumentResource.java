@@ -28,18 +28,6 @@ public class DocumentResource {
 	@Autowired
 	private DocumentFactory documentFactory;
 
-	@GET
-	public List<String> documentList() {
-    	return Arrays.asList(
-			Application.DOCUMENT_FOLDER.list( 
-				(File dir, String name) -> {
-					File file = new File(dir, name);
-					return file.isFile() && documentFactory.isSupported(file); 
-				}
-			)
-		);
-    }
-
 	private File openDocumentFile(String documentName) {
 		File documentFile = new File(Application.DOCUMENT_FOLDER, documentName);
 		if (!documentFile.exists()) {
