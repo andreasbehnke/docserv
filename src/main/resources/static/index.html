@@ -5,21 +5,33 @@
 	<script type="text/javascript" src="js/jquery-2.1.4.min.js"></script>
 	<script type="text/javascript">
 	
+	var path = "";
+	
 	$(document).ready(function() {
 		$.ajax({
-			url: "/services/document",
+			url: "/services/directory" + path,
 			success: function(documentList) {
-				$.each(documentList, function(index, documentName) {
-					$("<li><a href='#'>" + documentName + "</a></li>")
+				$.each(documentList, function(index, documentItem) {
+					var itemPath = documentItem.path;
+					var itemName = documentItem.name;
+					if (documentItem.folder) {
+						$("<li><a href='#'>" + itemName + "</a></li>")
 						.on("click", function() {
-							openDocument(documentName, 0);
+							alert(itemPath);
 						})
 						.appendTo("#document-list");
+					} else {
+						$("<li><a href='#'>" + itemName + "</a></li>")
+						.on("click", function() {
+							openDocument(itemPath, 0);
+						})
+						.appendTo("#document-list");	
+					}
             		});
 				}
 			});	
-		$("#previous-page").on("click", previousPage).hide();
-		$("#next-page").on("click", nextPage).hide();
+		$("#previous-page").hide();
+		$("#next-page").hide();
 	});
 
 	var documentObject = null;
@@ -32,15 +44,17 @@
 				$("#document-name").html(documentObject.name);
 				$("#document-info").html("Number of pages: " + documentObject.pageCount + ", last modified: " + documentObject.lastModified);
 				$("#page-image").attr("src", "data:image/png;base64," + documentObject.pageImageSrc);
+				var prevLink = $("#previous-page");
+				var nextLink = $("#next-page");
 				if (documentObject.pageIndex > 0) {
-					$("#previous-page").show();
+					prevLink.unbind().on("click", previousPage).show();
 				} else {
-					$("#previous-page").hide();
+					prevLink.hide();
 				}
 				if (documentObject.pageIndex < documentObject.pageCount - 1) {
-					$("#next-page").show();
+					nextLink.unbind().on("click", nextPage).show();
 				} else {
-					$("#next-page").hide();
+					nextLink.hide();
 				}
 				$("#current-page").html(documentObject.pageIndex + 1);
 			}
