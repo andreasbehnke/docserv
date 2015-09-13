@@ -13,12 +13,16 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 @Path("/directory")
 @Produces(MediaType.APPLICATION_JSON)
 public class DirectoryResource {
+	
+	@Autowired
+	private DocumentFactory documentFactory;
 	
 	private List<DocumentItem> generateDocumentList(String path) {
 
@@ -30,8 +34,12 @@ public class DirectoryResource {
 		}
 		if (directory.isDirectory()) {
 			for (File file : directory.listFiles()) {
-				String itemPath = root.relativize(file.toURI()).toString();
-				documentItems.add(new DocumentItem(itemPath, file.isDirectory()));
+				boolean addFile = file.isDirectory() || documentFactory.isSupported(file); 
+				if (addFile) {
+					String itemName = file.getName();
+					String itemPath = root.relativize(file.toURI()).toString();
+					documentItems.add(new DocumentItem(itemName, itemPath, file.isDirectory()));
+				}
 			}
 		} else {
 			throw new WebApplicationException(404);
